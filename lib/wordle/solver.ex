@@ -1,16 +1,35 @@
 defmodule Wordle.Solver do
-  @words_file "lib/wordle/resources/words.txt"
+  @moduledoc """
+  Module for solving Wordle puzzles by filtering words based on known constraints.
+  """
 
   def load_five_letter_words do
-    case File.read(@words_file) do
+    words_file = get_words_file_path()
+
+    case File.read(words_file) do
       {:ok, content} ->
         content
         |> String.split("\n", trim: true)
         |> Enum.filter(&(String.length(&1) == 5))
         |> Enum.map(&String.downcase/1)
 
-      {:error, _} ->
+      {:error, reason} ->
+        # Log the error for debugging
+        require Logger
+        Logger.warning("Failed to read words file at #{words_file}: #{inspect(reason)}")
         []
+    end
+  end
+
+  defp get_words_file_path do
+    # Try production path first (priv directory)
+    priv_path = Path.join(Application.app_dir(:wordle, "priv"), "static/words.txt")
+
+    if File.exists?(priv_path) do
+      priv_path
+    else
+      # Fallback to development path
+      "lib/wordle/resources/words.txt"
     end
   end
 
