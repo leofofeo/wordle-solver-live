@@ -43,11 +43,8 @@ defmodule Wordle.Solver do
   defp filter_by_known_letters(words, ""), do: words
 
   defp filter_by_known_letters(words, known_letters) do
-    required_letters =
-      known_letters
-      |> String.downcase()
-      |> String.graphemes()
-      |> Enum.uniq()
+    # Input is already sanitized: lowercased, letters only, no duplicates
+    required_letters = String.graphemes(known_letters)
 
     Enum.filter(words, fn word ->
       Enum.all?(required_letters, &String.contains?(word, &1))
@@ -57,11 +54,8 @@ defmodule Wordle.Solver do
   defp filter_by_excluded_letters(words, ""), do: words
 
   defp filter_by_excluded_letters(words, excluded_letters) do
-    excluded_set =
-      excluded_letters
-      |> String.downcase()
-      |> String.graphemes()
-      |> MapSet.new()
+    # Input is already sanitized: lowercased, letters only, no duplicates
+    excluded_set = excluded_letters |> String.graphemes() |> MapSet.new()
 
     Enum.filter(words, fn word ->
       word_letters = String.graphemes(word) |> MapSet.new()
@@ -80,7 +74,8 @@ defmodule Wordle.Solver do
         index = pos - 1
 
         if index >= 0 and index < length(word_chars) do
-          Enum.at(word_chars, index) == String.downcase(letter)
+          # Letter is already sanitized: lowercased, single character
+          Enum.at(word_chars, index) == letter
         else
           false
         end

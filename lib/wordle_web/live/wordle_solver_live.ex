@@ -20,14 +20,15 @@ defmodule WordleWeb.WordleSolverLive do
 
   @impl true
   def handle_event("solve", %{"solver" => params}, socket) do
-    known_letters = params["known_letters"] || ""
-    excluded_letters = params["excluded_letters"] || ""
+    # Sanitize letter inputs
+    known_letters = sanitize_letters(params["known_letters"] || "")
+    excluded_letters = sanitize_letters(params["excluded_letters"] || "")
 
     positions =
       1..5
       |> Enum.reduce(%{}, fn pos, acc ->
         position_key = "position_#{pos}"
-        letter = params[position_key] || ""
+        letter = sanitize_single_letter(params[position_key] || "")
 
         if letter != "" do
           Map.put(acc, pos, letter)
@@ -106,7 +107,7 @@ defmodule WordleWeb.WordleSolverLive do
                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
               <p class="text-xs text-gray-500 mt-1">
-                Letters you know are in the word (any position)
+                Letters you know are in the word (any position). Duplicates and special characters will be automatically removed.
               </p>
             </div>
 
@@ -123,7 +124,7 @@ defmodule WordleWeb.WordleSolverLive do
                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
               <p class="text-xs text-gray-500 mt-1">
-                Letters you know are NOT in the word
+                Letters you know are NOT in the word. Duplicates and special characters will be automatically removed.
               </p>
             </div>
           </div>
@@ -141,7 +142,9 @@ defmodule WordleWeb.WordleSolverLive do
                   name="solver[position_1]"
                   value={@position_1}
                   maxlength="1"
-                  class="w-full px-2 py-2 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  pattern="[A-Za-z]"
+                  oninput="this.value = this.value.replace(/[^A-Za-z]/g, '').slice(0,1)"
+                  class="w-full px-2 py-2 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase"
                 />
               </div>
               <div class="text-center">
@@ -151,7 +154,9 @@ defmodule WordleWeb.WordleSolverLive do
                   name="solver[position_2]"
                   value={@position_2}
                   maxlength="1"
-                  class="w-full px-2 py-2 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  pattern="[A-Za-z]"
+                  oninput="this.value = this.value.replace(/[^A-Za-z]/g, '').slice(0,1)"
+                  class="w-full px-2 py-2 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase"
                 />
               </div>
               <div class="text-center">
@@ -161,7 +166,9 @@ defmodule WordleWeb.WordleSolverLive do
                   name="solver[position_3]"
                   value={@position_3}
                   maxlength="1"
-                  class="w-full px-2 py-2 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  pattern="[A-Za-z]"
+                  oninput="this.value = this.value.replace(/[^A-Za-z]/g, '').slice(0,1)"
+                  class="w-full px-2 py-2 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase"
                 />
               </div>
               <div class="text-center">
@@ -171,7 +178,9 @@ defmodule WordleWeb.WordleSolverLive do
                   name="solver[position_4]"
                   value={@position_4}
                   maxlength="1"
-                  class="w-full px-2 py-2 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  pattern="[A-Za-z]"
+                  oninput="this.value = this.value.replace(/[^A-Za-z]/g, '').slice(0,1)"
+                  class="w-full px-2 py-2 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase"
                 />
               </div>
               <div class="text-center">
@@ -181,12 +190,14 @@ defmodule WordleWeb.WordleSolverLive do
                   name="solver[position_5]"
                   value={@position_5}
                   maxlength="1"
-                  class="w-full px-2 py-2 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  pattern="[A-Za-z]"
+                  oninput="this.value = this.value.replace(/[^A-Za-z]/g, '').slice(0,1)"
+                  class="w-full px-2 py-2 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase"
                 />
               </div>
             </div>
             <p class="text-xs text-gray-500 mt-2">
-              Enter letters you know are in specific positions
+              Enter letters you know are in specific positions. Only alphabetic characters are allowed.
             </p>
           </div>
 
@@ -299,4 +310,28 @@ defmodule WordleWeb.WordleSolverLive do
     </div>
     """
   end
+
+  # Private helper functions for input sanitization
+
+  defp sanitize_letters(input) when is_binary(input) do
+    input
+    |> String.trim()
+    |> String.downcase()
+    |> String.replace(~r/[^a-z]/, "")  # Remove non-letter characters
+    |> String.graphemes()
+    |> Enum.uniq()  # Remove duplicates by converting to set-like behavior
+    |> Enum.join()
+  end
+
+  defp sanitize_letters(_), do: ""
+
+  defp sanitize_single_letter(input) when is_binary(input) do
+    input
+    |> String.trim()
+    |> String.downcase()
+    |> String.replace(~r/[^a-z]/, "")
+    |> String.slice(0, 1)  # Take only the first letter
+  end
+
+  defp sanitize_single_letter(_), do: ""
 end
