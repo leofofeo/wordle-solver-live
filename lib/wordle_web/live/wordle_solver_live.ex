@@ -37,7 +37,7 @@ defmodule WordleWeb.WordleSolverLive do
         end
       end)
 
-    # Start loading state
+    
     socket = assign(socket, loading: true, error: nil)
 
     try do
