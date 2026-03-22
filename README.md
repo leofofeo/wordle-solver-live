@@ -9,4 +9,4 @@ Eventually I'll update it to allow for words greater than 5 characters in length
 
 [Use it here](https://wordle-solver.gigalixirapp.com/)
 
-##### deployment 1.1
+##### deployment 1.3
