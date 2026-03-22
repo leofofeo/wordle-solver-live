@@ -39,7 +39,7 @@ if config_env() == :prod do
   config :wordle, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
   config :wordle, WordleWeb.Endpoint,
-    url: [host: host, port: 443, scheme: "http"],
+    url: [host: host, port: 4000, scheme: "http"],
     http: [
       # Enable IPv6 and bind on all interfaces.
       # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
@@ -81,5 +81,4 @@ if config_env() == :prod do
   #       force_ssl: [hsts: true]
   #
   # Check `Plug.SSL` for all available options in `force_ssl`.
-
 end
